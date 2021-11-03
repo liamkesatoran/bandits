@@ -1,3 +1,19 @@
+# DVC plots
+plots.html
+
+# Untitled
+Untitled*
+
+# Dask
+.dask
+dask-worker-space
+
+# Models
+*.model
+
+# Data
+/data
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
