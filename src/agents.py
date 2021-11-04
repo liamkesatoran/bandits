@@ -7,10 +7,14 @@ from scipy.stats import bernoulli, beta
 random.seed(100)
 np.random.seed(100)
 
+
 def argmax(vec):
+    """Chose randomly one index where the input realizes it's maximum."""
     return np.random.choice((vec == vec.max()).nonzero()[0])
 
+
 class Agent():
+    """Base properties of all multi-armed bandits."""
     def __init__(self, n_arms):
         """
         n_arms: int
@@ -25,7 +29,7 @@ class Agent():
         return self.tries.sum()
     
     def add_observation(self, arm, reward):
-        """
+        """An observation consists of a pair `(arm,reward)`.
         arm: int
             Chosen arm of the observation
         reward: float
@@ -41,6 +45,7 @@ class Agent():
 
 
 class GreedyExploreFirst(Agent):
+    """We explore for `learning_stop` steps then exploit the reward that gave the most expected reward so far."""
     def __init__(self, n_arms, learning_stop):
         """
         n_arms: int
@@ -64,6 +69,7 @@ class GreedyExploreFirst(Agent):
     
 
 class EpsilonGreedy(Agent):
+    """At each step, we throw an $\epsilon$-weighted coin toss do decide wether to explore or exploit."""
     @property
     def _epsilon(self):
         # value taken from https://arxiv.org/pdf/1904.07272.pdf theorem 1.6
@@ -88,7 +94,12 @@ class EpsilonGreedy(Agent):
         return arm
     
 
-class UCB1(Agent):        
+class UCB1(Agent):
+    """This uses the concept of 'optimism under uncertainty'.
+    
+    We assume the expected reward of each arm is the upper confidence bound (UCB) of the arm so far.
+
+    The confidence radius is calculated using Hoeffding’s Inequality."""
     @property
     def _confidence_radius(self):
         radius = np.sqrt(2 * np.log(self._total_tries) / self.tries)
@@ -111,6 +122,7 @@ class UCB1(Agent):
 
 
 class BayesUCB(Agent):
+    """Assess UCB using knowledge of the Bernoulli distribution and it's conjugate prior, the Beta distribution."""
     def __init__(self, n_arms, c=2):
         """
         n_arms: int
@@ -139,23 +151,23 @@ class BayesUCB(Agent):
         if self._total_tries < self.n_arms:
             arm = self._total_tries
         else: 
-            ucb = self._params_a / (self._params_a + self._params_b) # Mean
-            ucb += self.c * beta.std(self._params_a, self._params_b) # Confidence Radius
-            arm = argmax(ucb)
+            bayes_ucb = self._params_a / (self._params_a + self._params_b) # Mean
+            bayes_ucb += self.c * beta.std(self._params_a, self._params_b) # Confidence Radius
+            arm = argmax(bayes_ucb)
         arm = int(arm)
         return arm
 
 
 class ThompsonSampling(Agent):
-    def __init__(self, n_arms, c=2):
+    """Every arm is supposed to be a Beta distribution with parameters `a` = successes, `b` = failures.
+
+    At each step we sample from the Beta distributions of all arms and chose an arm with the largest sample."""
+    def __init__(self, n_arms):
         """
         n_arms: int
             Number of arms
-        c: float
-            Amount of standard deviations considered for the UCB
         """
         super().__init__(n_arms)
-        self.c = c # Amount of standard deviations considered for ucb
         self._params_a = np.ones(n_arms) # Params a of Beta
         self._params_b = np.ones(n_arms) # Params b of Beta
   
