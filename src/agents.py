@@ -74,7 +74,7 @@ class EpsilonGreedy(Agent):
     def select_arm(self):
         # if epsilon-weighted coin toss is true, explore
         
-        if self._total_tries < n_arms:
+        if self._total_tries < self.n_arms:
             arm = self._total_tries
         else:
             epsilon = self._epsilon
