@@ -29,7 +29,7 @@ class Agent():
         return self.tries.sum()
     
     def add_observation(self, arm, reward):
-        """An observation consists of a pair `(arm,reward)`.
+        """An observation consists of a pair `(arm, reward)`.
         arm: int
             Chosen arm of the observation
         reward: float
@@ -106,7 +106,7 @@ class UCB1(Agent):
         return radius
     
     @property
-    def _ucb(self):
+    def _UCB(self):
         success_rate = self.successes / self.tries
         return success_rate + self._confidence_radius
     
@@ -115,8 +115,8 @@ class UCB1(Agent):
         if self._total_tries < self.n_arms:
             arm = self._total_tries
         else: 
-            ucb = self._ucb
-            arm = argmax(ucb)
+            UCB = self._UCB
+            arm = argmax(UCB)
         arm = int(arm)
         return arm
 
@@ -131,7 +131,7 @@ class BayesUCB(Agent):
             Amount of standard deviations considered for the UCB
         """
         super().__init__(n_arms)
-        self.c = c # Amount of standard deviations considered for ucb
+        self.c = c # Amount of standard deviations considered for UCB
         self._params_a = np.ones(n_arms) # Params a of Beta
         self._params_b = np.ones(n_arms) # Params b of Beta
   
@@ -142,7 +142,7 @@ class BayesUCB(Agent):
         reward: bool
             Reward obtained in the observation
         """
-        super().add_observation(arm,reward)
+        super().add_observation(arm, reward)
         self._params_a[arm] += reward
         self._params_b[arm] += 1 - reward
     
@@ -151,9 +151,9 @@ class BayesUCB(Agent):
         if self._total_tries < self.n_arms:
             arm = self._total_tries
         else: 
-            bayes_ucb = self._params_a / (self._params_a + self._params_b) # Mean
-            bayes_ucb += self.c * beta.std(self._params_a, self._params_b) # Confidence Radius
-            arm = argmax(bayes_ucb)
+            bayes_UCB = self._params_a / (self._params_a + self._params_b) # Mean
+            bayes_UCB += self.c * beta.std(self._params_a, self._params_b) # Confidence Radius
+            arm = argmax(bayes_UCB)
         arm = int(arm)
         return arm
 
@@ -178,7 +178,7 @@ class ThompsonSampling(Agent):
         reward: bool
             Reward obtained in the observation
         """
-        super().add_observation(arm,reward)
+        super().add_observation(arm, reward)
         self._params_a[arm] += reward
         self._params_b[arm] += 1 - reward
     
