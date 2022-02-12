@@ -1,4 +1,5 @@
 # bandits
+GitHub repository showcasing different Multi Armed Bandits and Contextual MAB algorithms & implementations on real recommendation data. 
 
 ## References
 - https://arxiv.org/pdf/1904.07272.pdf
